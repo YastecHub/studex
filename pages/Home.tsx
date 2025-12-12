@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Layout } from '../components/Layout';
 import { AIChatbot } from '../components/AIChatbot';
 import { HireModal } from '../components/HireModal';
 import { useUser } from '../UserContext';
 import { UserRole } from '../types';
-import { SERVICES, CATEGORIES, CURRENT_USER } from '../constants';
+import { CATEGORIES, CURRENT_USER } from '../constants';
+import { getServices } from '../services/api';
 import { Search, Sparkles, Star, MapPin, DollarSign, Clock, CheckCircle, Briefcase, BookOpen, Play } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -13,6 +14,8 @@ export const Home: React.FC = () => {
   const { userData, userRole, profileMode, setProfileMode, isHybridMode } = useUser();
   const [activeCategory, setActiveCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
+  const [services, setServices] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [hireModal, setHireModal] = useState<{ isOpen: boolean; freelancerName: string; serviceTitle: string }>({ 
     isOpen: false, 
     freelancerName: '', 
@@ -31,12 +34,30 @@ export const Home: React.FC = () => {
     setHireModal({ isOpen: false, freelancerName: '', serviceTitle: '' });
   };
 
-  const filteredServices = SERVICES.filter(service => {
-    const matchesCategory = activeCategory === 'All' || service.category === activeCategory;
-    const matchesSearch = service.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          service.description.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        const result = await getServices({
+          page: 1,
+          limit: 12,
+          category: activeCategory,
+          search: searchQuery
+        });
+        
+        if (result.success) {
+          setServices(result.data.services || []);
+        }
+      } catch (error) {
+        console.error('Error fetching services:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchServices();
+  }, [activeCategory, searchQuery]);
+
+  const filteredServices = services;
   
   // Freelancer stats
   const freelancerStats = {
@@ -257,54 +278,64 @@ export const Home: React.FC = () => {
             </div>
             
             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-              {filteredServices.map(service => (
-                <div 
-                  key={service.id} 
-                  onClick={() => navigate(`/service/${service.id}`)}
-                  className="bg-white p-6 rounded-3xl border border-gray-100 shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer hover:scale-105 group"
-                >
-                  {/* Job Card Content */}
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-start">
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <img alt="Client Avatar" src={service.freelancerAvatar} className="w-6 h-6 rounded-full" />
-                        <span className="font-medium">Client</span>
-                      </div>
-                      {service.aiMatchScore && (
-                        <div className="bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full">
-                          {service.aiMatchScore}% Match
+              {loading ? (
+                Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="bg-white p-6 rounded-3xl border border-gray-100 shadow-lg animate-pulse">
+                    <div className="h-4 bg-gray-200 rounded mb-4"></div>
+                    <div className="h-6 bg-gray-200 rounded mb-2"></div>
+                    <div className="h-4 bg-gray-200 rounded mb-4"></div>
+                    <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                  </div>
+                ))
+              ) : (
+                filteredServices.map(service => (
+                  <div 
+                    key={service.id} 
+                    onClick={() => navigate(`/service/${service.id}`)}
+                    className="bg-white p-6 rounded-3xl border border-gray-100 shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer hover:scale-105 group"
+                  >
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-start">
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <img alt="Client Avatar" src={service.freelancerAvatar || 'https://picsum.photos/seed/default/200/200'} className="w-6 h-6 rounded-full" />
+                          <span className="font-medium">Client</span>
                         </div>
-                      )}
-                    </div>
-                    
-                    <h3 className="font-bold text-gray-900 text-lg mb-2 line-clamp-2 leading-tight">
-                      {service.title}
-                    </h3>
-                    
-                    <p className="text-gray-600 text-sm line-clamp-2">
-                      {service.description}
-                    </p>
-                    
-                    <div className="flex items-center gap-2 text-gray-500 text-sm">
-                      <MapPin size={16} />
-                      <span>Unilag Campus</span>
-                    </div>
-
-                    <div className="flex justify-between items-center pt-3 border-t border-gray-100">
-                      <p className="font-bold text-blue-600 text-xl">
-                        ₦{service.price.toLocaleString()}
-                        <span className="text-gray-400 text-sm font-normal ml-1">
-                          {service.priceType === 'NEGOTIABLE' ? '(Negotiable)' : ''}
-                        </span>
+                        {service.aiMatchScore && (
+                          <div className="bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full">
+                            {service.aiMatchScore}% Match
+                          </div>
+                        )}
+                      </div>
+                      
+                      <h3 className="font-bold text-gray-900 text-lg mb-2 line-clamp-2 leading-tight">
+                        {service.title}
+                      </h3>
+                      
+                      <p className="text-gray-600 text-sm line-clamp-2">
+                        {service.description}
                       </p>
-                      <div className="flex items-center text-yellow-500 text-sm font-bold gap-1">
-                        <Star size={16} fill="currentColor" />
-                        {service.rating}
+                      
+                      <div className="flex items-center gap-2 text-gray-500 text-sm">
+                        <MapPin size={16} />
+                        <span>Campus</span>
+                      </div>
+
+                      <div className="flex justify-between items-center pt-3 border-t border-gray-100">
+                        <p className="font-bold text-blue-600 text-xl">
+                          ₦{service.price?.toLocaleString()}
+                          <span className="text-gray-400 text-sm font-normal ml-1">
+                            {service.priceType === 'NEGOTIABLE' ? '(Negotiable)' : ''}
+                          </span>
+                        </p>
+                        <div className="flex items-center text-yellow-500 text-sm font-bold gap-1">
+                          <Star size={16} fill="currentColor" />
+                          {service.rating || 4.8}
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </div>
 
@@ -492,70 +523,79 @@ export const Home: React.FC = () => {
           </div>
           
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-            {filteredServices.map(service => (
-              <div 
-                key={service.id} 
-                onClick={() => navigate(`/service/${service.id}`)}
-                className="bg-white p-6 rounded-3xl border border-gray-100 shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer hover:scale-105 group"
-              >
-                {/* Image/Thumbnail */}
-                <div className="relative w-full h-48 mb-4">
-                  <img 
-                    src={service.portfolioImages[0]} 
-                    alt={service.title} 
-                    className="w-full h-full object-cover rounded-2xl group-hover:scale-105 transition-transform duration-300"
-                  />
-                  {service.aiMatchScore && (
-                    <div className="absolute top-3 right-3 bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full border-2 border-white shadow-lg">
-                      {service.aiMatchScore}% Match
-                    </div>
-                  )}
+            {loading ? (
+              Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="bg-white p-6 rounded-3xl border border-gray-100 shadow-lg animate-pulse">
+                  <div className="h-48 bg-gray-200 rounded-2xl mb-4"></div>
+                  <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                  <div className="h-6 bg-gray-200 rounded mb-2"></div>
+                  <div className="h-4 bg-gray-200 rounded w-1/2"></div>
                 </div>
-
-                {/* Content */}
-                <div className="space-y-3">
-                  <div className="flex justify-between items-start">
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <img alt="Client Avatar" src={service.freelancerAvatar} className="w-6 h-6 rounded-full" />
-                      <span className="font-medium">{service.freelancerName}</span>
-                    </div> 
-                    <div className="flex items-center text-yellow-500 text-sm font-bold gap-1">
-                      <Star size={16} fill="currentColor" />
-                      {service.rating}
-                    </div>
-                  </div>
-                  
-                  <h3 className="font-bold text-gray-900 text-lg mb-2 line-clamp-2 leading-tight">
-                    {service.title}
-                  </h3>
-                  
-                  <div className="flex items-center gap-2 text-gray-500 text-sm mb-4">
-                    <MapPin size={16} />
-                    <span>Unilag Campus</span>
+              ))
+            ) : (
+              filteredServices.map(service => (
+                <div 
+                  key={service.id} 
+                  onClick={() => navigate(`/service/${service.id}`)}
+                  className="bg-white p-6 rounded-3xl border border-gray-100 shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer hover:scale-105 group"
+                >
+                  <div className="relative w-full h-48 mb-4">
+                    <img 
+                      src={service.portfolioImages?.[0] || 'https://picsum.photos/seed/service/400/300'} 
+                      alt={service.title} 
+                      className="w-full h-full object-cover rounded-2xl group-hover:scale-105 transition-transform duration-300"
+                    />
+                    {service.aiMatchScore && (
+                      <div className="absolute top-3 right-3 bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full border-2 border-white shadow-lg">
+                        {service.aiMatchScore}% Match
+                      </div>
+                    )}
                   </div>
 
-                  <div className="flex justify-between items-center pt-3 border-t border-gray-100">
-                    <p className="font-bold text-blue-600 text-xl">
-                      ₦{service.price.toLocaleString()}
-                      <span className="text-gray-400 text-sm font-normal ml-1">
-                        {service.priceType === 'NEGOTIABLE' ? '(Est.)' : ''}
-                      </span>
-                    </p>
-                    <button 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        openHireModal(service.freelancerName, service.title);
-                      }}
-                      className="bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors"
-                    >
-                      Hire Now
-                    </button>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-start">
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <img alt="Freelancer Avatar" src={service.freelancerAvatar || 'https://picsum.photos/seed/default/200/200'} className="w-6 h-6 rounded-full" />
+                        <span className="font-medium">{service.freelancerName || 'Freelancer'}</span>
+                      </div> 
+                      <div className="flex items-center text-yellow-500 text-sm font-bold gap-1">
+                        <Star size={16} fill="currentColor" />
+                        {service.rating || 4.8}
+                      </div>
+                    </div>
+                    
+                    <h3 className="font-bold text-gray-900 text-lg mb-2 line-clamp-2 leading-tight">
+                      {service.title}
+                    </h3>
+                    
+                    <div className="flex items-center gap-2 text-gray-500 text-sm mb-4">
+                      <MapPin size={16} />
+                      <span>Campus</span>
+                    </div>
+
+                    <div className="flex justify-between items-center pt-3 border-t border-gray-100">
+                      <p className="font-bold text-blue-600 text-xl">
+                        ₦{service.price?.toLocaleString()}
+                        <span className="text-gray-400 text-sm font-normal ml-1">
+                          {service.priceType === 'NEGOTIABLE' ? '(Est.)' : ''}
+                        </span>
+                      </p>
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openHireModal(service.freelancerName || 'Freelancer', service.title);
+                        }}
+                        className="bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors"
+                      >
+                        Hire Now
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
             
-            {filteredServices.length === 0 && (
+            {!loading && filteredServices.length === 0 && (
               <div className="col-span-full text-center py-16 text-gray-500">
                 <div className="w-24 h-24 bg-gray-100 rounded-full mx-auto mb-4 flex items-center justify-center">
                   <Search size={32} className="text-gray-400" />

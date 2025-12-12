@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
+import { login } from '../services/api';
 
 export const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -10,7 +11,9 @@ export const Login: React.FC = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!formData.email.trim() || !formData.password.trim()) {
@@ -18,9 +21,21 @@ export const Login: React.FC = () => {
       return;
     }
     
-    // Simple login validation (in real app, this would be API call)
-    if (formData.email && formData.password) {
-      navigate('/home');
+    setLoading(true);
+    try {
+      const result = await login(formData.email, formData.password);
+      
+      if (result.success) {
+        localStorage.setItem('token', result.data.token);
+        localStorage.setItem('user', JSON.stringify(result.data.user));
+        navigate('/home');
+      } else {
+        alert(result.message || 'Login failed');
+      }
+    } catch (error) {
+      alert('Network error. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -36,7 +51,7 @@ export const Login: React.FC = () => {
       <div className="max-w-2xl mx-auto px-8 py-16">
         <div className="text-center mb-8">
           <div className="w-16 h-16 flex items-center justify-center mb-6 mx-auto shadow-xl">
-            <img src="./Rectangle 2.png" alt="StuDex Logo" className="w-full h-full object-contain" />
+            <img src="/Rectangle 2.png" alt="StuDex Logo" className="w-full h-full object-contain" />
           </div>
           <h1 className="text-5xl font-bold text-gray-900 mb-4">Welcome Back</h1>
           <p className="text-gray-600 text-2xl">Sign in to your StuDex account</p>
@@ -90,9 +105,10 @@ export const Login: React.FC = () => {
 
           <button
             type="submit"
-            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-5 rounded-2xl text-xl font-semibold shadow-2xl shadow-blue-200 hover:shadow-3xl hover:scale-105 transition-all duration-300"
+            disabled={loading}
+            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-5 rounded-2xl text-xl font-semibold shadow-2xl shadow-blue-200 hover:shadow-3xl hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Sign In
+            {loading ? 'Signing In...' : 'Sign In'}
           </button>
 
           <div className="text-center">

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useUser } from '../UserContext';
 import { UserRole } from '../types';
 import { X, Upload, Plus, Camera } from 'lucide-react';
+import { signup } from '../services/api';
 
 interface SignupData {
   firstName: string;
@@ -47,6 +48,9 @@ export const Signup: React.FC = () => {
   const [portfolioFiles, setPortfolioFiles] = useState<File[]>([]);
   const [profileImagePreview, setProfileImagePreview] = useState<string | null>(null);
 
+  const [loading, setLoading] = useState(false);
+  const [password, setPassword] = useState('');
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
@@ -57,7 +61,10 @@ export const Signup: React.FC = () => {
       return;
     }
     
-
+    if (!password.trim() || password.length < 6) {
+      alert('Password must be at least 6 characters');
+      return;
+    }
     
     // Freelancer-specific validation
     if (userRole === UserRole.FREELANCER || userRole === UserRole.HYBRID) {
@@ -65,22 +72,59 @@ export const Signup: React.FC = () => {
         alert('Please add a professional bio');
         return;
       }
-
     }
     
-    // Convert profile image to URL for display
-    const userDataWithImageUrl = {
-      ...formData,
-      profileImageUrl: profileImagePreview,
-      userRole
-    };
-    
-    // Update current user in constants
-    const { updateCurrentUser } = await import('../constants');
-    updateCurrentUser(userDataWithImageUrl);
-    
-    setUserData(userDataWithImageUrl);
-    navigate('/home');
+    setLoading(true);
+    try {
+      const apiFormData = new FormData();
+      apiFormData.append('matric', formData.matricNo);
+      apiFormData.append('email', formData.email);
+      apiFormData.append('password', password);
+      apiFormData.append('firstName', formData.firstName);
+      apiFormData.append('lastName', formData.lastName);
+      apiFormData.append('username', formData.username);
+      apiFormData.append('schoolName', formData.department);
+      apiFormData.append('skillCategory', userRole);
+      apiFormData.append('interests', JSON.stringify(selectedSkills));
+      
+      if (formData.profileImage) {
+        apiFormData.append('profileImage', formData.profileImage);
+      }
+      
+      const result = await signup(apiFormData);
+      
+      if (result.success) {
+        localStorage.setItem('token', result.data.token);
+        localStorage.setItem('user', JSON.stringify(result.data.user));
+        
+        // Update current user in constants
+        const { updateCurrentUser } = await import('../constants');
+        updateCurrentUser({
+          ...formData,
+          profileImageUrl: result.data.user.profileImage,
+          userRole
+        });
+        
+        setUserData({
+          ...formData,
+          profileImageUrl: result.data.user.profileImage,
+          userRole
+        });
+        
+        navigate('/home');
+      } else {
+        if (result.errors) {
+          const errorMessages = Object.values(result.errors).join('\n');
+          alert(errorMessages);
+        } else {
+          alert(result.message || 'Registration failed');
+        }
+      }
+    } catch (error) {
+      alert('Network error. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -148,7 +192,7 @@ export const Signup: React.FC = () => {
       <div className="max-w-2xl mx-auto px-8 py-16">
         <div className="text-center mb-8">
           <div className="w-16 h-16 flex items-center justify-center mb-6 mx-auto shadow-xl">
-            <img src="./Rectangle 2.png" alt="StuDex Logo" className="w-full h-full object-contain" />
+            <img src="/Rectangle 2.png" alt="StuDex Logo" className="w-full h-full object-contain" />
           </div>
           <h1 className="text-5xl font-bold text-gray-900 mb-4">Complete Your Profile</h1>
           <p className="text-gray-600 text-2xl">You're signing up as a <span className="font-semibold text-blue-600">{getRoleTitle()}</span></p>
@@ -306,6 +350,19 @@ export const Signup: React.FC = () => {
             />
           </div>
 
+          <div>
+            <label className="block text-base font-bold text-gray-800 mb-2">Password</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-4 py-4 text-base border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              placeholder="Create a password (min 6 characters)"
+              required
+              minLength={6}
+            />
+          </div>
+
           {/* Freelancer-specific fields */}
           {(userRole === UserRole.FREELANCER || userRole === UserRole.HYBRID) && (
             <>
@@ -393,9 +450,10 @@ export const Signup: React.FC = () => {
 
           <button
             type="submit"
-            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-5 rounded-2xl text-xl font-semibold shadow-2xl shadow-blue-200 hover:shadow-3xl hover:scale-105 transition-all duration-300"
+            disabled={loading}
+            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-5 rounded-2xl text-xl font-semibold shadow-2xl shadow-blue-200 hover:shadow-3xl hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Complete Registration →
+            {loading ? 'Creating Account...' : 'Complete Registration →'}
           </button>
         </form>
       </div>

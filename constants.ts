@@ -207,7 +207,7 @@ export const SERVICES: Service[] = [
 ];
 
 export const CATEGORIES = [
-  'All', 'Design', 'Development', 'Photography', 'Tutoring', 'Writing', 'Beauty', 'Laundry'
+  'All', 'Design', 'Development', 'Photography', 'Tutoring', 'Writing', 'Beauty', 'Laundry', 'Video'
 ];
 
 export const MOCK_TRANSACTIONS: WalletTransaction[] = [

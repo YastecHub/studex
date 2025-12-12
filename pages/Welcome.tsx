@@ -17,7 +17,7 @@ export const Welcome: React.FC = () => {
         <div className="max-w-4xl mx-auto px-8 py-16">
           <div className="text-center space-y-8">
             <div className="w-32 h-32 mx-auto flex items-center justify-center shadow-2xl shadow-blue-200 animate-pulse">
-               <img src="./Rectangle 2.png" alt="StuDex Logo" className="w-full h-full object-contain" />
+               <img src="/Rectangle 2.png" alt="StuDex Logo" className="w-full h-full object-contain" />
             </div>
             <div className="space-y-4">
               <h1 className="text-8xl font-bold text-gray-900 tracking-tight">StudEx</h1>
@@ -57,7 +57,7 @@ export const Welcome: React.FC = () => {
       <div className="max-w-4xl mx-auto px-8 py-16">
         <div className="text-center mb-12">
           <div className="w-16 h-16 flex items-center justify-center mb-6 mx-auto shadow-xl">
-             <img src="./Rectangle 2.png" alt="StuDex Logo" className="w-full h-full object-contain" />
+             <img src="/Rectangle 2.png" alt="StuDex Logo" className="w-full h-full object-contain" />
           </div>
           <h2 className="text-5xl font-bold text-gray-900 mb-4">Choose Your Path</h2>
           <p className="text-gray-600 text-2xl">How would you like to use StuDex?</p>

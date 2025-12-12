@@ -32,7 +32,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, hideNav = false }) => 
           <div className="p-6 border-b border-gray-100">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 flex items-center justify-center">
-                <img src="./Rectangle 2.png" alt="StuDex Logo" className="w-full h-full object-contain" />
+                <img src="/Rectangle 2.png" alt="StuDex Logo" className="w-full h-full object-contain" />
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">StuDex</h1>
