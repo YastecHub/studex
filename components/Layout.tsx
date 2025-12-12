@@ -1,5 +1,5 @@
-import React from 'react';
-import { Home, Search, MessageSquare, User, Wallet, Settings, Bell, Menu } from 'lucide-react';
+import React, { useState } from 'react';
+import { Home, Search, MessageSquare, User, Wallet, Settings, Bell, Menu, X } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useUser } from '../UserContext';
 
@@ -12,6 +12,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, hideNav = false }) => 
   const navigate = useNavigate();
   const location = useLocation();
   const { userData } = useUser();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navItems = [
     { icon: Home, label: 'Home', path: '/home' },
@@ -25,19 +26,34 @@ export const Layout: React.FC<LayoutProps> = ({ children, hideNav = false }) => 
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex">
+      {/* Mobile Menu Overlay */}
+      {isMobileMenuOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden" onClick={() => setIsMobileMenuOpen(false)} />
+      )}
+      
       {/* Sidebar Navigation */}
       {!hideNav && (
-        <div className="w-72 bg-white shadow-xl border-r border-gray-100 flex flex-col">
+        <div className={`w-72 bg-white shadow-xl border-r border-gray-100 flex flex-col fixed lg:relative inset-y-0 left-0 z-50 transform transition-transform duration-300 ease-in-out lg:transform-none ${
+          isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+        }`}>
           {/* Logo Header */}
           <div className="p-6 border-b border-gray-100">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 flex items-center justify-center">
-                <img src="/Rectangle 2.png" alt="StuDex Logo" className="w-full h-full object-contain" />
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 flex items-center justify-center">
+                  <img src="/logo.png" alt="StuDex Logo" className="w-full h-full object-contain" />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold text-gray-900">StuDex</h1>
+                  <p className="text-sm text-gray-500">Desktop App</p>
+                </div>
               </div>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">StuDex</h1>
-                <p className="text-sm text-gray-500">Desktop App</p>
-              </div>
+              <button
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="lg:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <X size={20} className="text-gray-600" />
+              </button>
             </div>
           </div>
 
@@ -88,16 +104,19 @@ export const Layout: React.FC<LayoutProps> = ({ children, hideNav = false }) => 
       )}
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col lg:ml-0">
         {/* Top Bar */}
-        <div className="bg-white/80 backdrop-blur-sm border-b border-gray-100 px-6 py-4 flex items-center justify-between">
+        <div className="bg-white/80 backdrop-blur-sm border-b border-gray-100 px-4 lg:px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            {hideNav && (
-              <button title="Toggle navigation" className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+            {!hideNav && (
+              <button 
+                onClick={() => setIsMobileMenuOpen(true)}
+                className="lg:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
                 <Menu size={20} className="text-gray-600" />
               </button>
             )}
-            <div className="text-base text-gray-500">
+            <div className="text-sm lg:text-base text-gray-500 hidden sm:block">
               {new Date().toLocaleDateString('en-US', { 
                 weekday: 'long', 
                 year: 'numeric', 
@@ -132,7 +151,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, hideNav = false }) => 
 
         {/* Main Content */}
         <main className="flex-1 overflow-y-auto">
-          <div className="max-w-7xl mx-auto">
+          <div className="max-w-7xl mx-auto px-4 lg:px-0">
             {children}
           </div>
         </main>

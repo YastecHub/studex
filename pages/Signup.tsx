@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../UserContext';
+import { useToast } from '../contexts/ToastContext';
 import { UserRole } from '../types';
-import { X, Upload, Plus, Camera } from 'lucide-react';
+import { X, Upload, Loader, Camera } from 'lucide-react';
 import { signup } from '../services/api';
 
 interface SignupData {
@@ -31,6 +32,7 @@ const AVAILABLE_SKILLS = [
 export const Signup: React.FC = () => {
   const navigate = useNavigate();
   const { userRole, setUserData } = useUser();
+  const { showToast } = useToast();
   const [formData, setFormData] = useState<SignupData>({
     firstName: '',
     lastName: '',
@@ -50,28 +52,40 @@ export const Signup: React.FC = () => {
 
   const [loading, setLoading] = useState(false);
   const [password, setPassword] = useState('');
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
-    // Basic validation
+    // Validate form
+    const validationErrors: Record<string, string> = {};
     const basicFields = [formData.firstName, formData.lastName, formData.email, formData.department, formData.level, formData.matricNo, formData.username];
+    
     if (!basicFields.every(value => value.trim())) {
-      alert('Please fill in all required fields');
+      showToast('error', 'Missing Required Fields', 'Please fill in all required fields');
       return;
     }
     
+    if (!formData.email.includes('@')) {
+      validationErrors.email = 'Please enter a valid email address';
+    }
+    
     if (!password.trim() || password.length < 6) {
-      alert('Password must be at least 6 characters');
-      return;
+      validationErrors.password = 'Password must be at least 6 characters';
     }
     
     // Freelancer-specific validation
     if (userRole === UserRole.FREELANCER || userRole === UserRole.HYBRID) {
       if (!formData.bio.trim()) {
-        alert('Please add a professional bio');
-        return;
+        validationErrors.bio = 'Please add a professional bio';
       }
+    }
+    
+    if (Object.keys(validationErrors).length > 0) {
+      const errorMessage = Object.values(validationErrors)[0];
+      showToast('error', 'Validation Error', errorMessage);
+      setErrors(validationErrors);
+      return;
     }
     
     setLoading(true);
@@ -84,7 +98,13 @@ export const Signup: React.FC = () => {
       apiFormData.append('lastName', formData.lastName);
       apiFormData.append('username', formData.username);
       apiFormData.append('schoolName', formData.department);
-      apiFormData.append('skillCategory', userRole);
+      // Map frontend UserRole to backend skillCategory format
+      const skillCategoryMap = {
+        [UserRole.CLIENT]: 'Client',
+        [UserRole.FREELANCER]: 'Freelancer', 
+        [UserRole.HYBRID]: 'Hybrid'
+      };
+      apiFormData.append('skillCategory', skillCategoryMap[userRole]);
       apiFormData.append('interests', JSON.stringify(selectedSkills));
       
       if (formData.profileImage) {
@@ -111,17 +131,21 @@ export const Signup: React.FC = () => {
           userRole
         });
         
-        navigate('/home');
+        showToast('success', 'Account Created!', 'Welcome to StuDex. Redirecting...');
+        setTimeout(() => navigate('/home'), 1500);
       } else {
         if (result.errors) {
-          const errorMessages = Object.values(result.errors).join('\n');
-          alert(errorMessages);
+          const errorList = Object.entries(result.errors)
+            .map(([, value]) => value)
+            .join('\n');
+          showToast('error', 'Registration Failed', errorList);
         } else {
-          alert(result.message || 'Registration failed');
+          showToast('error', 'Registration Failed', result.message || 'Please check your information and try again');
         }
       }
-    } catch (error) {
-      alert('Network error. Please try again.');
+    } catch (error: any) {
+      const errorMsg = error?.message || 'Please check your connection and try again';
+      showToast('error', 'Connection Error', errorMsg);
     } finally {
       setLoading(false);
     }
@@ -192,7 +216,7 @@ export const Signup: React.FC = () => {
       <div className="max-w-2xl mx-auto px-8 py-16">
         <div className="text-center mb-8">
           <div className="w-16 h-16 flex items-center justify-center mb-6 mx-auto shadow-xl">
-            <img src="/Rectangle 2.png" alt="StuDex Logo" className="w-full h-full object-contain" />
+            <img src="/logo.png" alt="StuDex Logo" className="w-full h-full object-contain" />
           </div>
           <h1 className="text-5xl font-bold text-gray-900 mb-4">Complete Your Profile</h1>
           <p className="text-gray-600 text-2xl">You're signing up as a <span className="font-semibold text-blue-600">{getRoleTitle()}</span></p>
@@ -451,9 +475,16 @@ export const Signup: React.FC = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-5 rounded-2xl text-xl font-semibold shadow-2xl shadow-blue-200 hover:shadow-3xl hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 rounded-lg text-lg font-semibold shadow-md hover:shadow-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-8"
           >
-            {loading ? 'Creating Account...' : 'Complete Registration →'}
+            {loading ? (
+              <>
+                <Loader size={20} className="animate-spin" />
+                <span>Creating Account...</span>
+              </>
+            ) : (
+              'Complete Registration →'
+            )}
           </button>
         </form>
       </div>

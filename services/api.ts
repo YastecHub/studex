@@ -12,11 +12,24 @@ interface ApiResponse<T = any> {
 }
 
 export const signup = async (formData: FormData): Promise<ApiResponse> => {
+  console.log('API_BASE_URL:', API_BASE_URL);
+  
   const response = await fetch(`${API_BASE_URL}/api/auth/signup`, {
     method: 'POST',
     body: formData
   });
-  return response.json();
+  
+  console.log('Response status:', response.status);
+  
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error('Response error:', errorText);
+    return { success: false, message: `Server error: ${response.status}` };
+  }
+  
+  const result = await response.json();
+  console.log('Signup response:', result);
+  return result;
 };
 
 export const login = async (email: string, password: string): Promise<ApiResponse> => {
