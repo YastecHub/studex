@@ -21,12 +21,9 @@ interface SignupData {
 }
 
 const AVAILABLE_SKILLS = [
-  'React', 'JavaScript', 'TypeScript', 'Node.js', 'Python', 'Java', 'PHP',
-  'UI/UX Design', 'Graphic Design', 'Photoshop', 'Figma', 'Adobe Illustrator',
-  'Content Writing', 'Copywriting', 'SEO', 'Social Media Marketing',
-  'Photography', 'Video Editing', 'Animation', 'WordPress', 'Shopify',
-  'Mobile Development', 'Flutter', 'React Native', 'iOS', 'Android',
-  'Data Analysis', 'Machine Learning', 'Excel', 'PowerBI', 'SQL'
+  'Web Development', 'Mobile Development', 'UI/UX Design', 'Graphic Design',
+  'Content Writing', 'Digital Marketing', 'Photography', 'Video Editing',
+  'Data Analysis', 'Tutoring', 'Translation', 'Virtual Assistant'
 ];
 
 export const Signup: React.FC = () => {
@@ -212,25 +209,25 @@ export const Signup: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-indigo-50">
-      <div className="max-w-2xl mx-auto px-8 py-16">
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 flex items-center justify-center mb-6 mx-auto shadow-xl">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-indigo-50 px-4 py-8">
+      <div className="max-w-2xl mx-auto w-full">
+        <div className="text-center mb-6 lg:mb-8">
+          <div className="w-12 h-12 lg:w-16 lg:h-16 flex items-center justify-center mb-4 lg:mb-6 mx-auto shadow-xl">
             <img src="/logo.png" alt="StuDex Logo" className="w-full h-full object-contain" />
           </div>
-          <h1 className="text-5xl font-bold text-gray-900 mb-4">Complete Your Profile</h1>
-          <p className="text-gray-600 text-2xl">You're signing up as a <span className="font-semibold text-blue-600">{getRoleTitle()}</span></p>
+          <h1 className="text-2xl sm:text-3xl lg:text-5xl font-bold text-gray-900 mb-2 lg:mb-4">Complete Your Profile</h1>
+          <p className="text-gray-600 text-sm sm:text-lg lg:text-2xl">You're signing up as a <span className="font-semibold text-blue-600">{getRoleTitle()}</span></p>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-white rounded-3xl shadow-2xl p-8 space-y-6">
+        <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 space-y-4">
           {/* Profile Image Upload */}
-          <div className="flex justify-center mb-6">
+          <div className="flex justify-center mb-4 lg:mb-6">
             <div className="relative">
-              <div className="w-32 h-32 rounded-full border-4 border-gray-200 overflow-hidden bg-gray-100 flex items-center justify-center">
+              <div className="w-24 h-24 sm:w-28 sm:h-28 lg:w-32 lg:h-32 rounded-full border-4 border-gray-200 overflow-hidden bg-gray-100 flex items-center justify-center">
                 {profileImagePreview ? (
                   <img src={profileImagePreview} alt="Profile preview" className="w-full h-full object-cover" />
                 ) : (
-                  <Camera size={32} className="text-gray-400" />
+                  <Camera size={24} className="text-gray-400 sm:w-7 sm:h-7 lg:w-8 lg:h-8" />
                 )}
               </div>
               <input
@@ -244,248 +241,191 @@ export const Signup: React.FC = () => {
               <label
                 htmlFor="profile-image-upload"
                 title="Upload profile picture"
-                className="absolute -bottom-2 -right-2 w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center cursor-pointer hover:bg-blue-700 transition-colors shadow-lg"
-              >
-                <Camera size={18} />
+                className="absolute -bottom-2 -right-2 w-8 h-8 lg:w-10 lg:h-10 bg-blue-600 rounded-full flex items-center justify-center cursor-pointer hover:bg-blue-700 transition-colors shadow-lg">
+                <Upload size={16} className="text-white lg:w-5 lg:h-5" />
               </label>
               {profileImagePreview && (
                 <button
                   type="button"
                   onClick={removeProfileImage}
-                  title="Remove profile picture"
-                  className="absolute -top-2 -right-2 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors"
+                  className="absolute -top-2 -right-2 w-6 h-6 lg:w-8 lg:h-8 bg-red-500 rounded-full flex items-center justify-center cursor-pointer hover:bg-red-600 transition-colors shadow-lg"
                 >
-                  <X size={14} />
+                  <X size={12} className="text-white lg:w-4 lg:h-4" />
                 </button>
               )}
             </div>
           </div>
-          <div className="text-center mb-6">
-            <p className="text-base text-gray-600">Upload your profile picture (Optional)</p>
-            <p className="text-sm text-gray-500">JPG, PNG or GIF (Max 5MB) - Can be added later in profile</p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+          {/* Basic Information */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6">
             <div>
-              <label className="block text-base font-bold text-gray-800 mb-2">First Name</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">First Name *</label>
               <input
                 type="text"
                 name="firstName"
                 value={formData.firstName}
                 onChange={handleChange}
-                className="w-full px-4 py-4 text-base border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                placeholder="Enter your first name"
+                className="w-full px-3 py-2 lg:px-4 lg:py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm lg:text-base"
                 required
               />
             </div>
-
             <div>
-              <label className="block text-base font-bold text-gray-800 mb-2">Last Name</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Last Name *</label>
               <input
                 type="text"
                 name="lastName"
                 value={formData.lastName}
                 onChange={handleChange}
-                className="w-full px-4 py-4 text-base border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                placeholder="Enter your last name"
+                className="w-full px-3 py-2 lg:px-4 lg:py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm lg:text-base"
                 required
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-base font-bold text-gray-800 mb-2">Email Address</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Email *</label>
             <input
               type="email"
               name="email"
               value={formData.email}
               onChange={handleChange}
-              className="w-full px-4 py-4 text-base border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-              placeholder="Enter your email address"
+              className="w-full px-3 py-2 lg:px-4 lg:py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm lg:text-base"
               required
             />
           </div>
 
           <div>
-            <label className="block text-base font-bold text-gray-800 mb-2">Department</label>
-            <select
-              name="department"
-              value={formData.department}
-              onChange={handleChange}
-              className="w-full px-4 py-4 text-base border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+            <label className="block text-sm font-medium text-gray-700 mb-2">Password *</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-3 py-2 lg:px-4 lg:py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm lg:text-base"
               required
-            >
-              <option value="">Select your department</option>
-              <option value="Computer Science">Computer Science</option>
-              <option value="Engineering">Engineering</option>
-              <option value="Business Administration">Business Administration</option>
-              <option value="Medicine">Medicine</option>
-              <option value="Law">Law</option>
-              <option value="Arts">Arts</option>
-              <option value="Sciences">Sciences</option>
-              <option value="Social Sciences">Social Sciences</option>
-            </select>
+            />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6">
             <div>
-              <label className="block text-base font-bold text-gray-800 mb-2">Level</label>
-              <select
-                name="level"
-                value={formData.level}
+              <label className="block text-sm font-medium text-gray-700 mb-2">Username *</label>
+              <input
+                type="text"
+                name="username"
+                value={formData.username}
                 onChange={handleChange}
-                className="w-full px-4 py-4 text-base border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                className="w-full px-3 py-2 lg:px-4 lg:py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm lg:text-base"
                 required
-              >
-                <option value="">Select level</option>
-                <option value="100">100 Level</option>
-                <option value="200">200 Level</option>
-                <option value="300">300 Level</option>
-                <option value="400">400 Level</option>
-                <option value="500">500 Level</option>
-                <option value="600">600 Level</option>
-              </select>
+              />
             </div>
-
             <div>
-              <label className="block text-base font-bold text-gray-800 mb-2">Matric No</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Matric Number *</label>
               <input
                 type="text"
                 name="matricNo"
                 value={formData.matricNo}
                 onChange={handleChange}
-                className="w-full px-4 py-4 text-base border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                placeholder="e.g. CSC/2023/001"
+                className="w-full px-3 py-2 lg:px-4 lg:py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm lg:text-base"
                 required
               />
             </div>
           </div>
 
-          <div>
-            <label className="block text-base font-bold text-gray-800 mb-2">Username</label>
-            <input
-              type="text"
-              name="username"
-              value={formData.username}
-              onChange={handleChange}
-              className="w-full px-4 py-4 text-base border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-              placeholder="Choose a unique username"
-              required
-            />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Department *</label>
+              <input
+                type="text"
+                name="department"
+                value={formData.department}
+                onChange={handleChange}
+                className="w-full px-3 py-2 lg:px-4 lg:py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm lg:text-base"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Level *</label>
+              <select
+                name="level"
+                value={formData.level}
+                onChange={handleChange}
+                className="w-full px-3 py-2 lg:px-4 lg:py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm lg:text-base"
+                required
+              >
+                <option value="">Select Level</option>
+                <option value="100">100 Level</option>
+                <option value="200">200 Level</option>
+                <option value="300">300 Level</option>
+                <option value="400">400 Level</option>
+                <option value="500">500 Level</option>
+              </select>
+            </div>
           </div>
 
+          {/* Skills Selection */}
           <div>
-            <label className="block text-base font-bold text-gray-800 mb-2">Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-4 text-base border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-              placeholder="Create a password (min 6 characters)"
-              required
-              minLength={6}
-            />
+            <label className="block text-sm font-medium text-gray-700 mb-2">Skills & Interests</label>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {AVAILABLE_SKILLS.map(skill => (
+                <button
+                  key={skill}
+                  type="button"
+                  onClick={() => handleSkillToggle(skill)}
+                  className={`px-2 py-1.5 rounded text-xs font-medium transition-colors ${
+                    selectedSkills.includes(skill)
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  {skill}
+                </button>
+              ))}
+            </div>
           </div>
 
-          {/* Freelancer-specific fields */}
+          {/* Bio for Freelancers */}
           {(userRole === UserRole.FREELANCER || userRole === UserRole.HYBRID) && (
-            <>
-              {/* Bio */}
-              <div>
-                <label className="block text-base font-bold text-gray-800 mb-2">Professional Bio</label>
-                <textarea
-                  name="bio"
-                  value={formData.bio}
-                  onChange={handleChange}
-                  rows={3}
-                  className="w-full px-4 py-4 text-base border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
-                  placeholder="Tell clients about your skills and experience..."
-                  required
-                />
-              </div>
-
-              {/* Skills Selection */}
-              <div>
-                <label className="block text-base font-bold text-gray-800 mb-3">Select Your Skills</label>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-48 overflow-y-auto border border-gray-200 rounded-xl p-4">
-                  {AVAILABLE_SKILLS.map(skill => (
-                    <label key={skill} className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors">
-                      <input
-                        type="checkbox"
-                        checked={selectedSkills.includes(skill)}
-                        onChange={() => handleSkillToggle(skill)}
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                      />
-                      <span className="text-base text-gray-700">{skill}</span>
-                    </label>
-                  ))}
-                </div>
-                <p className="text-sm text-gray-500 mt-2">Select skills that best describe your expertise (can be updated later in profile)</p>
-              </div>
-
-              {/* Portfolio Upload */}
-              <div>
-                <label className="block text-base font-bold text-gray-800 mb-3">Upload Portfolio (Optional)</label>
-                <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-blue-400 transition-colors">
-                  <input
-                    type="file"
-                    multiple
-                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif,.mp4,.mov"
-                    onChange={handleFileUpload}
-                    className="hidden"
-                    id="portfolio-upload"
-                  />
-                  <label htmlFor="portfolio-upload" className="cursor-pointer">
-                    <Upload size={32} className="mx-auto text-gray-400 mb-2" />
-                    <p className="text-gray-600 font-medium text-base">Click to upload portfolio files</p>
-                    <p className="text-sm text-gray-500 mt-1">PDF, DOC, Images, Videos (Max 10MB each) - Can be added later in profile</p>
-                  </label>
-                </div>
-                
-                {/* Uploaded Files */}
-                {portfolioFiles.length > 0 && (
-                  <div className="mt-4 space-y-2">
-                    <p className="text-sm font-medium text-gray-700">Uploaded Files:</p>
-                    {portfolioFiles.map((file, index) => (
-                      <div key={index} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                            <Upload size={16} className="text-blue-600" />
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-gray-900">{file.name}</p>
-                            <p className="text-xs text-gray-500">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
-                          </div>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => removeFile(index)}
-                          className="p-1 hover:bg-gray-200 rounded-lg transition-colors"
-                        >
-                          <X size={16} className="text-gray-500" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Professional Bio *</label>
+              <textarea
+                name="bio"
+                value={formData.bio}
+                onChange={handleChange}
+                rows={4}
+                className="w-full px-3 py-2 lg:px-4 lg:py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm lg:text-base resize-none"
+                placeholder="Tell clients about your experience and expertise..."
+                required
+              />
+            </div>
           )}
 
+          {/* Submit Button */}
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 rounded-lg text-lg font-semibold shadow-md hover:shadow-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-8"
+            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 lg:py-4 px-6 rounded-xl font-semibold text-sm lg:text-lg hover:from-blue-700 hover:to-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             {loading ? (
               <>
-                <Loader size={20} className="animate-spin" />
-                <span>Creating Account...</span>
+                <Loader className="animate-spin" size={20} />
+                Creating Account...
               </>
             ) : (
-              'Complete Registration →'
+              'Create Account'
             )}
           </button>
+
+          <div className="text-center pt-4">
+            <p className="text-gray-600 text-sm">
+              Already have an account?{' '}
+              <button
+                type="button"
+                onClick={() => navigate('/login')}
+                className="text-blue-600 hover:text-blue-700 font-medium"
+              >
+                Sign In
+              </button>
+            </p>
+          </div>
         </form>
       </div>
     </div>

@@ -25,6 +25,7 @@ export const Home: React.FC = () => {
   const displayName = userData?.username || userData?.firstName || CURRENT_USER.name.split(' ')[0];
   const userAvatar = userData?.profileImageUrl || CURRENT_USER.avatar;
   const userName = userData?.username || CURRENT_USER.name;
+  const userRoleDisplay = userData?.skillCategory || (isHybridMode ? 'Hybrid User' : 'User');
   
   const openHireModal = (freelancerName: string, serviceTitle: string) => {
     setHireModal({ isOpen: true, freelancerName, serviceTitle });
@@ -36,10 +37,15 @@ export const Home: React.FC = () => {
 
   useEffect(() => {
     const fetchServices = async () => {
+      if (!searchQuery && activeCategory === 'All') {
+        setLoading(false);
+        return;
+      }
+      
       try {
         const result = await getServices({
           page: 1,
-          limit: 12,
+          limit: 6,
           category: activeCategory,
           search: searchQuery
         });
@@ -54,7 +60,8 @@ export const Home: React.FC = () => {
       }
     };
     
-    fetchServices();
+    const timeoutId = setTimeout(fetchServices, 300);
+    return () => clearTimeout(timeoutId);
   }, [activeCategory, searchQuery]);
 
   const filteredServices = services;
@@ -133,7 +140,7 @@ export const Home: React.FC = () => {
   if (userRole === UserRole.FREELANCER || (isHybridMode && profileMode === 'freelancer')) {
     return (
       <Layout>
-        <div className="p-8 space-y-8">
+        <div className="p-4 lg:p-8 space-y-4 lg:space-y-8">
           {/* Dual Mode Switcher for Hybrid Users */}
           {isHybridMode && (
             <div className="flex justify-center mb-6">
@@ -165,29 +172,29 @@ export const Home: React.FC = () => {
           )}
 
           {/* Freelancer Header */}
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Hi {displayName} 👋</h1>
-              <p className="text-gray-600 text-lg mt-1">
-                {isHybridMode ? 'Freelancer Mode - Ready to find your next project?' : 'Ready to find your next project?'}
+              <h1 className="text-xl lg:text-3xl font-bold text-gray-900">Hello, {displayName} 👋</h1>
+              <p className="text-gray-600 text-sm lg:text-lg mt-1">
+                {isHybridMode ? 'Freelancer Mode' : 'Ready to find your next project?'}
               </p>
             </div>
-            <div className="flex items-center gap-4">
-              <div className="text-right">
+            <div className="flex items-center gap-3 self-start sm:self-auto">
+              <div className="text-right hidden sm:block">
                 <p className="text-sm font-medium text-gray-900">{userName}</p>
-                <p className="text-xs text-gray-500">{isHybridMode ? 'Hybrid User' : 'Freelancer'}</p>
+                <p className="text-xs text-gray-500">{userRoleDisplay}</p>
               </div>
               <img 
                 src={userAvatar} 
                 alt="Profile" 
-                className="w-12 h-12 rounded-full object-cover border-3 border-white shadow-lg cursor-pointer hover:shadow-xl transition-shadow"
+                className="w-10 h-10 lg:w-12 lg:h-12 rounded-full object-cover border-2 border-white shadow-lg cursor-pointer hover:shadow-xl transition-shadow"
                 onClick={() => navigate('/profile')}
               />
             </div>
           </div>
 
           {/* Freelancer Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 lg:gap-6">
             <div className="bg-gradient-to-r from-green-500 to-emerald-500 rounded-3xl p-6 text-white">
               <div className="flex items-center justify-between">
                 <div>
@@ -226,12 +233,12 @@ export const Home: React.FC = () => {
           </div>
 
           {/* Search */}
-          <div className="relative max-w-2xl">
-            <Search className="absolute left-5 top-4 text-gray-400" size={22} />
+          <div className="relative">
+            <Search className="absolute left-3 lg:left-5 top-3 lg:top-4 text-gray-400" size={18} />
             <input 
               type="text"
-              placeholder="Search for jobs, projects, or clients..."
-              className="w-full pl-14 pr-6 py-4 bg-white border border-gray-200 rounded-2xl shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:outline-none text-lg transition-all"
+              placeholder="Search for jobs, projects..."
+              className="w-full pl-10 lg:pl-14 pr-4 lg:pr-6 py-3 lg:py-4 bg-white border border-gray-200 rounded-xl lg:rounded-2xl shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:outline-none text-sm lg:text-lg transition-all"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -279,12 +286,11 @@ export const Home: React.FC = () => {
             
             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
               {loading ? (
-                Array.from({ length: 6 }).map((_, i) => (
-                  <div key={i} className="bg-white p-6 rounded-3xl border border-gray-100 shadow-lg animate-pulse">
-                    <div className="h-4 bg-gray-200 rounded mb-4"></div>
-                    <div className="h-6 bg-gray-200 rounded mb-2"></div>
-                    <div className="h-4 bg-gray-200 rounded mb-4"></div>
-                    <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm animate-pulse">
+                    <div className="h-3 bg-gray-200 rounded mb-3"></div>
+                    <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                    <div className="h-3 bg-gray-200 rounded w-1/2"></div>
                   </div>
                 ))
               ) : (
@@ -353,13 +359,14 @@ export const Home: React.FC = () => {
             </div>
             
             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-              {LEARNING_COURSES.map(course => (
-                <div key={course.id} className="bg-white rounded-3xl border border-gray-100 shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer hover:scale-105 group">
+              {LEARNING_COURSES.slice(0, 3).map(course => (
+                <div key={course.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
                   <div className="relative">
                     <img 
                       src={course.image} 
                       alt={course.title}
-                      className="w-full h-48 object-cover rounded-t-3xl group-hover:scale-105 transition-transform duration-300"
+                      className="w-full h-40 object-cover rounded-t-2xl"
+                      loading="lazy"
                     />
                     <div className="absolute inset-0 bg-black/20 rounded-t-3xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                       <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center">
@@ -459,7 +466,7 @@ export const Home: React.FC = () => {
           <div className="flex items-center gap-4">
             <div className="text-right">
               <p className="text-sm font-medium text-gray-900">{userName}</p>
-              <p className="text-xs text-gray-500">{isHybridMode ? 'Hybrid User' : 'Premium Member'}</p>
+              <p className="text-xs text-gray-500">{userRoleDisplay}</p>
             </div>
             <img 
               src={userAvatar} 
@@ -515,10 +522,120 @@ export const Home: React.FC = () => {
           ))}
         </div>
 
-        {/* Service List */}
+        {/* Popular Services - Only for Client Users */}
+        {(userRole === UserRole.CLIENT || (isHybridMode && profileMode === 'client')) && (
+          <div className="space-y-6">
+            <div className="flex justify-between items-end">
+              <h2 className="text-2xl font-bold text-gray-900">Popular Services</h2>
+              <button className="text-blue-600 text-lg font-medium hover:text-blue-700 transition-colors">See all →</button>
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
+              {[
+                {
+                  id: 1,
+                  image: 'Frontend Dev.jpg',
+                  title: 'Frontend Development',
+                  description: 'Build responsive websites and web applications with modern frameworks'
+                },
+                {
+                  id: 2,
+                  image: 'photographer.jpg',
+                  title: 'Photography Services',
+                  description: 'Professional photography for events, portraits, and commercial projects'
+                },
+                {
+                  id: 3,
+                  image: 'fashionDesigner.jpg',
+                  title: 'Fashion Design',
+                  description: 'Custom clothing design and fashion consulting services'
+                },
+                {
+                  id: 4,
+                  image: 'MakeupArtist .jpg',
+                  title: 'Makeup Artist',
+                  description: 'Professional makeup services for events, photoshoots, and special occasions'
+                },
+                {
+                  id: 5,
+                  image: 'TutorStudentResearch.jpg',
+                  title: 'Academic Tutoring',
+                  description: 'Expert tutoring and research assistance for students'
+                },
+                {
+                  id: 6,
+                  image: 'ArtistSongwriterPianist.jpg',
+                  title: 'Music & Arts',
+                  description: 'Music composition, songwriting, and artistic services'
+                },
+                {
+                  id: 7,
+                  image: 'model.jpg',
+                  title: 'Modeling Services',
+                  description: 'Professional modeling for fashion, commercial, and artistic projects'
+                },
+                {
+                  id: 8,
+                  image: 'peronalshopper.jpg',
+                  title: 'Personal Shopping',
+                  description: 'Curated shopping experiences and style consultation'
+                }
+              ].map(service => (
+                <div 
+                  key={service.id}
+                  className="bg-white rounded-2xl lg:rounded-3xl border border-gray-100 shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer hover:scale-105 group overflow-hidden"
+                >
+                  <div className="relative w-full h-40 sm:h-48">
+                    <img 
+                      src={service.image}
+                      alt={service.title}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  </div>
+
+                  <div className="p-4 lg:p-6 space-y-3">
+                    <h3 className="font-bold text-gray-900 text-base lg:text-lg line-clamp-1">
+                      {service.title}
+                    </h3>
+                    
+                    <p className="text-gray-600 text-sm line-clamp-2">
+                      {service.description}
+                    </p>
+
+                    <div className="flex flex-col sm:flex-row gap-2 pt-2">
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openHireModal('Service Provider', service.title);
+                        }}
+                        className="flex-1 bg-blue-600 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+                      >
+                        Book Now
+                      </button>
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/service/${service.id}`);
+                        }}
+                        className="flex-1 border border-gray-300 text-gray-700 px-3 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
+                      >
+                        View Details
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Service List - For all users */}
         <div className="space-y-6">
           <div className="flex justify-between items-end">
-            <h2 className="text-2xl font-bold text-gray-900">Popular Services</h2>
+            <h2 className="text-2xl font-bold text-gray-900">
+              {(userRole === UserRole.CLIENT || (isHybridMode && profileMode === 'client')) ? 'All Services' : 'Available Services'}
+            </h2>
             <button className="text-blue-600 text-lg font-medium hover:text-blue-700 transition-colors">See all →</button>
           </div>
           
